@@ -1,2 +1,5 @@
 ---
 # defaults file for ansible-role-nextcloud
+
+nextcloud_required_apache_modules:
+  - "rewrite"
