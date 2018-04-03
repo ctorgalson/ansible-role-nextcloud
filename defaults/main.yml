@@ -3,3 +3,11 @@
 
 nextcloud_required_apache_modules:
   - "rewrite"
+
+nextcloud_recommended_apache_modules:
+  - "headers"
+  - "env"
+  - "dir"
+  - "mime"
+
+nextcloud_enable_recommended_apache_modules: true

@@ -5,7 +5,9 @@
   apache2_module:
     name: "{{ apache2_required_module_item }}"
     state: present
-  with_items: "{{ nextcloud_required_apache_modules }}"
+  with_flattened:
+    - "{{ nextcloud_required_apache_modules }}"
+    - "{{ nextcloud_enable_recommended_apache_modules | ternary(nextcloud_recommended_apache_modules, []) }}"
   loop_control:
     loop_var: apache2_required_module_item
   become: true
