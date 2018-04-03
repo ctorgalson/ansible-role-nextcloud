@@ -1,0 +1,109 @@
+---
+- name: Prepare
+  hosts: all
+  gather_facts: true
+  become: true
+
+  vars:
+    # Repeatedly-used stuff.
+    app_hostname: "instance"
+    app_vhost_dir: "/var/www/{{ app_hostname }}"
+    app_docroot: "docroot"
+    app_user: "jenkins"
+    app_configured_message: "webserver configuration successful!"
+    apache_user: "{{ www-data }}"
+
+    # geerlingguy.apache vars.
+    apache_mods_enabled:
+      - rewrite.load
+      - proxy.load
+      - ssl.load
+    apache_vhosts:
+      - servername: "{{ app_hostname }}"
+        documentroot: "{{ app_vhost_dir }}/{{ app_docroot }}"
+        extra_parameters: |
+              ProxyPassMatch ^/(.*\.php(/.*)?)$ "fcgi://127.0.0.1:9000{{ app_vhost_dir }}/{{ app_docroot }}"
+
+    # geerlingguy.php-versions vars.
+    php_version: "7.2"
+
+    # geerlingguy.php vars.
+    php_enable_php_fpm: true
+    php_packages_extra:
+      - "libapache2-mod-php{{ php_version }}"
+
+    # geerlingguy.
+
+  pre_tasks:
+    - name: Create required users.
+      user:
+        name: "{{ app_user }}"
+
+    - name: Create required directories.
+      file:
+        path: "{{ app_vhost_dir }}"
+        owner: "root"
+        group: "root"
+        state: directory
+
+    # Temp
+    - name: Install dev stuff.
+      block:
+        - name: Install packages.
+          apt:
+            name: "{{ item }}"
+          with_items:
+            - curl
+            - vim-gtk
+          become: true
+
+        - name: Create temp docroot dir.
+          file:
+            path: "{{ app_vhost_dir }}/{{ app_docroot }}"
+            owner: "{{ app_user }}"
+            group: "{{ app_user }}"
+            state: directory
+          become: true
+
+        - name: Create temp php file.
+          lineinfile:
+            path: "{{ app_vhost_dir }}/{{ app_docroot }}/index.php"
+            line: "<?php echo '{{ app_configured_message }}'; ?>"
+            create: true
+            owner: "{{ app_user }}"
+            group: "{{ app_user }}"
+
+  roles:
+    - geerlingguy.apache
+    - geerlingguy.php-versions
+    - geerlingguy.php
+    - geerlingguy.apache-php-fpm
+
+  post_tasks:
+    - name: Run a basic test of server config.
+      block:
+        # This shell command should not be necessary, but see the following
+        # github issue: https://github.com/ansible/ansible/issues/21208.
+        - name: Start php fpm.
+          shell: "service php{{ php_version }}-fpm start"
+          args:
+            warn: false
+          become: true
+
+        - name: Request a test php page.
+          command: "curl instance"
+          args:
+            warn: false
+          register: index_output
+
+        - name: Remove test php page and parent directory.
+          file:
+            path: "{{ app_vhost_dir }}/{{ app_docroot }}"
+            state: absent
+          register: index_absent
+          become: true
+
+        - assert:
+            that:
+              - index_output.stdout == app_configured_message
+              - not index_absent.failed
