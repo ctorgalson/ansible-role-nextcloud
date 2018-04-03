@@ -1,7 +1,7 @@
 ---
 # tasks file for ansible-role-nextcloud
 
-- name: Ensure require Apache modules are enabled.
+- name: Ensure required Apache modules are enabled.
   apache2_module:
     name: "{{ apache2_required_module_item }}"
     state: present
