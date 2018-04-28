@@ -1,5 +1,16 @@
 ---
 - name: Converge
   hosts: all
+
+  vars:
+    nextcloud_git_dest: "/var/www/instance/docroot"
+    nextcloud_db_name: "nextcloud"
+    nextcloud_db_user: "nextcloud"
+    nextcloud_db_pass: "nextcloud"
+    nextcloud_db_root_user: "root"
+    nextcloud_db_root_password: "instance"
+    nextcloud_admin_user: "admin"
+    nextcloud_admin_pass: "password"
+
   roles:
     - role: ansible-role-nextcloud
