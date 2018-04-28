@@ -97,6 +97,8 @@
     # Currently we're able to use geerlingguy's apache and apache-php-fpm roles,
     # but this issues causes geerlingguy.mysql to fail, so we've installed mysql
     # manually above.
+    #
+    # It also looks like this may not even work to start mysql...
     - name: Start php fpm.
       shell: "service {{ item }} start"
       args:

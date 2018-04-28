@@ -3,8 +3,6 @@
   version: 2.1.1
 - role: geerlingguy.apache-php-fpm
   version: 1.1.0
-# - role: geerlingguy.mysql
-#   version: 2.8.2
 - role: geerlingguy.php
   version: 3.5.1
 - role: geerlingguy.php-versions
