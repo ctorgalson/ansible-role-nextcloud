@@ -9,5 +9,57 @@ nextcloud_recommended_apache_modules:
   - "env"
   - "dir"
   - "mime"
+  - "ssl"
 
-nextcloud_enable_recommended_apache_modules: true
+nextcloud_apache_user: "www-data"
+
+nextcloud_required_php_modules:
+  # Should be enabled by default: ctype, iconv, libxml, posix, zlib.
+  - "gd"
+  - "json"
+  - "mbstring"
+  # xml provides xmlreader, xmlwriter.
+  - "xml"
+  - "zip"
+
+nextcloud_recommended_php_modules:
+  # Should be enabled by default: fileinfo, openssl.
+  - "curl"
+  - "bz2"
+  - "intl"
+
+nextcloud_verify_requirements: true
+
+# Should be `mysql` or `pgsql`. Currently, only `mysql` is supported.
+#
+nextcloud_db_type: "mysql"
+nextcloud_db_name: "nextcloud"
+nextcloud_db_user: "nextcloud"
+
+# This should be a secure value, probably provided via ansible_vault or some
+# similar tool.
+#
+# nextcloud_db_pass: "insecure_password"
+nextcloud_db_pass_encrypted: false
+nextcloud_configure_database: true
+nextcloud_db_root_user: "root"
+
+# This should be a safe value, preferably provided using ansible_vault etc.
+#
+nextcloud_db_root_pass: "insecure_password"
+
+nextcloud_git_force: false
+nextcloud_git_repo: "https://github.com/nextcloud/server.git"
+
+# Where is the Nextcloud codebase going to reside? The codebase will be cloned
+# into this directory.
+#
+# nextcloud_git_dest: "/var/www/nextcloud/docroot"
+
+nextcloud_git_update: false
+nextcloud_git_repo_version: "v13.0.0"
+
+# Provide these values from the playbook, ideally using ansible_vault.
+#
+# nextcloud_admin_user: "admin"
+# nextcloud_admin_pass: "password"
