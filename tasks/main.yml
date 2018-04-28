@@ -1,13 +1,61 @@
 ---
 # tasks file for ansible-role-nextcloud
 
-- name: Ensure required Apache modules are enabled.
-  apache2_module:
-    name: "{{ apache2_required_module_item }}"
-    state: present
-  with_flattened:
-    - "{{ nextcloud_required_apache_modules }}"
-    - "{{ nextcloud_enable_recommended_apache_modules | ternary(nextcloud_recommended_apache_modules, []) }}"
-  loop_control:
-    loop_var: apache2_required_module_item
+- name: Include RAM tasks.
+  include_tasks: ram.yml
+
+- name: Include Apache tasks.
+  include_tasks: apache.yml
+
+- name: Include PHP tasks.
+  include_tasks: php.yml
+
+- name: Include database tasks tasks.
+  include_tasks: "{{ nextcloud_db_type }}.yml"
+
+- name: Clone Nextcloud repository to remote filesystem and set permissions.
+  block:
+    - name: Clone Nextcloud codebase.
+      git:
+        accept_hostkey: true
+        force: "{{ nextcloud_git_force }}"
+        repo: "{{ nextcloud_git_repo }}"
+        dest: "{{ nextcloud_git_dest }}"
+        update: "{{ nextcloud_git_update }}"
+        version: "{{ nextcloud_git_repo_version | default(omit) }}"
+
+    - name: Set correct permissions on Nextcloud directory.
+      file:
+        path: "{{ item }}"
+        owner: "{{ nextcloud_apache_user }}"
+        group: "{{ nextcloud_apache_user }}"
+        state: directory
+        recurse: true
+      with_items:
+        - "{{ nextcloud_git_dest }}"
+
+- name: Check if Nextcloud is already installed.
+  shell: "php occ status"
+  args:
+    chdir: "{{ nextcloud_git_dest }}"
+    warn: false
+  register: nextcloud_installed
+  changed_when: false
   become: true
+  become_user: "{{ nextcloud_apache_user }}"
+
+- name: Run Nextcloud installer.
+  shell: >
+    php occ maintenance:install
+    --database "{{ nextcloud_db_type }}"
+    --database-name "{{ nextcloud_db_name }}"
+    --database-user "{{ nextcloud_db_user }}"
+    --database-pass "{{ nextcloud_db_pass }}"
+    --admin-user "{{ nextcloud_admin_user }}"
+    --admin-pass "{{ nextcloud_admin_pass }}"
+  args:
+    chdir: "{{ nextcloud_git_dest }}"
+    warn: false
+  become: true
+  become_user: "{{ nextcloud_apache_user }}"
+  when: "'installed: true' not in nextcloud_installed.stdout"

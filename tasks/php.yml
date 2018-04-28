@@ -1,0 +1,35 @@
+---
+# PHP related tasks.
+
+# Retain the whole 3 digit version string like `7.2.4` to allow playbooks to
+# make fine version distinctions.
+- name: Determine PHP version.
+  shell: "php -v | head -n1 | awk '{print $2}' | cut -d '-' -f1"
+  args:
+    warn: false
+  register: nextcloud_php_version
+  changed_when: false
+
+- name: Check PHP version.
+  assert:
+    that:
+      - "{{ nextcloud_php_version is version(nextcloud_min_php_version, '>=') }}"
+  when: nextcloud_verify_requirements
+
+# Create a version name like `7.2` from `7.2.4` for use in package names.
+- name: Create PHP module name prefix from version.
+  set_fact:
+    nextcloud_php_module_prefix: "php{{ nextcloud_php_version.stdout | regex_replace('\\.\\d$', '') }}"
+
+- name: Install PHP modules with apt.
+  apt:
+    name: "{{ nextcloud_php_module_prefix }}-{{ php_required_module_item }}"
+    state: present
+  with_flattened:
+    - "{{ nextcloud_required_php_modules }}"
+    - "{{ nextcloud_recommended_php_modules }}"
+    - "{{ nextcloud_php_version is version('7.2', '<') | ternary('mcrypt', [])}}"
+    - "{{ nextcloud_db_type }}"
+  loop_control:
+    loop_var: php_required_module_item
+  become: true

@@ -1,0 +1,34 @@
+---
+# Mysql related tasks.
+
+- name: Check that mysql/mariadb installed.
+  shell: "which mysql"
+  args:
+    warn: false
+  register: nextcloud_mysql_path
+  changed_when: false
+
+- name: Check database server.
+  assert:
+    that:
+      - nextcloud_mysql_path.rc == 0
+  when: nextcloud_verify_requirements
+
+- name: Ensure db exists.
+  mysql_db:
+    name: "{{ nextcloud_db_name }}"
+    login_user: "{{ nextcloud_db_root_user }}"
+    login_password: "{{ nextcloud_db_root_password }}"
+    state: present
+  when: nextcloud_configure_database
+
+- name: Ensure db user exists.
+  mysql_user:
+    name: "{{ nextcloud_db_user }}"
+    password: "{{ nextcloud_db_pass }}"
+    login_user: "{{ nextcloud_db_root_user }}"
+    login_password: "{{ nextcloud_db_root_password }}"
+    encrypted: "{{ nextcloud_db_pass_encrypted }}"
+    state: present
+    priv: "{{ nextcloud_db_name }}.*:ALL"
+  when: nextcloud_configure_database

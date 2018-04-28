@@ -1,0 +1,27 @@
+---
+# Apache related tasks.
+
+# Retain the full three part version string so playbooks can be picky about it.
+- name: Determine Apache version.
+  shell: "apache2 -v | head -n1 | awk '{print $3}' | cut -d '/' -f2"
+  args:
+    warn: false
+  register: nextcloud_apache_version
+  changed_when: false
+
+- name: Check Apache version.
+  assert:
+    that:
+      - "{{ nextcloud_apache_version is version(nextcloud_min_apache_version, '>=') }}"
+  when: nextcloud_verify_requirements
+
+- name: Ensure required Apache modules are enabled.
+  apache2_module:
+    name: "{{ apache2_required_module_item }}"
+    state: present
+  with_flattened:
+    - "{{ nextcloud_required_apache_modules }}"
+    - "{{ nextcloud_recommended_apache_modules }}"
+  loop_control:
+    loop_var: apache2_required_module_item
+  become: true

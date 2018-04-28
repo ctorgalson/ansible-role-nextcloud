@@ -1,0 +1,15 @@
+---
+# RAM related tasks.
+
+- name: Determine available memory.
+  shell: "vmstat -s -S M | head -n 1 | awk '{print $1}'"
+  args:
+    warn: false
+  register: nextcloud_system_ram
+  changed_when: false
+
+- name: Check system RAM.
+  assert:
+    that:
+      - nextcloud_system_ram >= nextcloud_min_ram
+  when: nextcloud_verify_requirements
