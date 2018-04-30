@@ -63,7 +63,7 @@
   when: "'installed: true' not in nextcloud_installed.stdout"
 
 - name: Ensure this is a trusted domain.
-  shell: "php occ config:system:set trusted_domains {{ item.0 + nextcloud_trusted_domain_start }} --value={{ item.1 }}"
+  shell: "php occ config:system:set trusted_domains {{ item.0 + nextcloud_trusted_domain_counter }} --value={{ item.1 }}"
   args:
     chdir: "{{ nextcloud_git_dest }}"
     warn: false
