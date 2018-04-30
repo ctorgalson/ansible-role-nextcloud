@@ -19,7 +19,7 @@
 # Create a version name like `7.2` from `7.2.4` for use in package names.
 - name: Create PHP module name prefix from version.
   set_fact:
-    nextcloud_php_module_prefix: "php{{ nextcloud_php_version.stdout | regex_replace('\\.\\d$', '') }}"
+    nextcloud_php_module_prefix: "php{{ nextcloud_php_version.stdout | regex_replace('\\.\\d+$', '') }}"
 
 - name: Install PHP modules with apt.
   apt:
