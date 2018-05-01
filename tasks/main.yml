@@ -62,12 +62,24 @@
   become_user: "{{ nextcloud_apache_user }}"
   when: "'installed: true' not in nextcloud_installed.stdout"
 
-- name: Ensure this is a trusted domain.
-  shell: "php occ config:system:set trusted_domains {{ item.0 + nextcloud_trusted_domain_counter }} --value={{ item.1 }}"
-  args:
-    chdir: "{{ nextcloud_git_dest }}"
-    warn: false
-  with_indexed_items: "{{ nextcloud_trusted_domains }}"
-  become: true
-  become_user: "{{ nextcloud_apache_user }}"
-  when: "'installed: true' in nextcloud_installed.stdout"
+- name: Run Nextcloud configuration commands.
+  block:
+    - name: Ensure this is a trusted domain.
+      shell: "php occ config:system:set trusted_domains {{ item.0 }} --value={{ item.1 }}"
+      args:
+        chdir: "{{ nextcloud_git_dest }}"
+        warn: false
+      with_indexed_items: "{{ nextcloud_trusted_domains }}"
+      become: true
+      become_user: "{{ nextcloud_apache_user }}"
+      when: "'installed: true' in nextcloud_installed.stdout or nextcloud_install_command.rc == 0"
+
+    - name: Run other Nextcloud configuration commands.
+      shell: "{{ item }}"
+      args:
+        chdir: "{{ nextcloud_git_dest }}"
+        warn: false
+      with_items: "{{ nextcloud_config_commands }}"
+      become: true
+      become_user: "{{ nextcloud_apache_user }}"
+      when: "'installed: true' in nextcloud_installed.stdout or nextcloud_install_command.rc == 0"
