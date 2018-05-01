@@ -68,4 +68,6 @@ nextcloud_git_repo_version: "v13.0.0"
 # nextcloud_admin_user: "admin"
 # nextcloud_admin_pass: "password"
 
+nextcloud_data_dir: "{{ nextcloud_git_dest }}/data"
+
 nextcloud_config_commands: []

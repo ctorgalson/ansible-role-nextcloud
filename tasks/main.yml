@@ -53,6 +53,7 @@
     --database-pass "{{ nextcloud_db_pass }}"
     --admin-user "{{ nextcloud_admin_user }}"
     --admin-pass "{{ nextcloud_admin_pass }}"
+    --data-dir "{{ nextcloud_data_dir }}"
   args:
     chdir: "{{ nextcloud_git_dest }}"
     warn: false
@@ -75,7 +76,7 @@
       when: "'installed: true' in nextcloud_installed.stdout or nextcloud_install_command.rc == 0"
 
     - name: Run other Nextcloud configuration commands.
-      shell: "{{ item }}"
+      shell: "php occ {{ item }}"
       args:
         chdir: "{{ nextcloud_git_dest }}"
         warn: false
