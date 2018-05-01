@@ -57,7 +57,7 @@
   args:
     chdir: "{{ nextcloud_git_dest }}"
     warn: false
-  no_log: true
+  no_log: "{{ nextcloud_install_no_log | default(true) }}"
   register: nextcloud_install_command
   become: true
   become_user: "{{ nextcloud_apache_user }}"
