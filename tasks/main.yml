@@ -45,15 +45,7 @@
   become_user: "{{ nextcloud_apache_user }}"
 
 - name: Run Nextcloud installer.
-  shell: >
-    php occ maintenance:install
-    --database "{{ nextcloud_db_type }}"
-    --database-name "{{ nextcloud_db_name }}"
-    --database-user "{{ nextcloud_db_user }}"
-    --database-pass "{{ nextcloud_db_pass }}"
-    --admin-user "{{ nextcloud_admin_user }}"
-    --admin-pass "{{ nextcloud_admin_pass }}"
-    --data-dir "{{ nextcloud_data_dir }}"
+  shell: "{{ nextcloud_install_command }}"
   args:
     chdir: "{{ nextcloud_git_dest }}"
     warn: false
