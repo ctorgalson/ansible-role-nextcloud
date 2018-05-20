@@ -3,4 +3,4 @@
 
 nextcloud_min_ram: "512"
 nextcloud_min_apache_version: "2.4"
-nextcloud_min_php_version: "7.0"
+nextcloud_min_php_version: "7.1"
