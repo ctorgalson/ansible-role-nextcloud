@@ -54,11 +54,9 @@ nextcloud_db_user: "nextcloud"
 nextcloud_db_pass_encrypted: false
 nextcloud_configure_database: true
 nextcloud_db_root_user: "root"
-# nextcloud_db_root_password: "insecure_root_password"
-
 # This should be a safe value, preferably provided using ansible_vault etc.
 #
-nextcloud_db_root_pass: "insecure_password"
+# nextcloud_db_root_password: "insecure_root_password"
 
 nextcloud_git_force: false
 nextcloud_git_repo: "https://github.com/nextcloud/server.git"
